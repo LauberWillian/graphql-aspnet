@@ -8,9 +8,11 @@
     using GraphQL.AspNet.ValidationRules.Interfaces;
     using GraphQL.AspNet.Common.Extensions;
     using System.Collections.Generic;
+    using System.Net.Http;
 
     internal class Program
     {
+        private static HttpClient _client = new HttpClient();
         private static void Main(string[] args)
         {
             // this utility scans the graphql aspnet libraries
@@ -57,17 +59,22 @@
                     rulePrint = $"{ruleNumber}-{i++}";
                 rules.Add(rulePrint);
 
-                Console.WriteLine("Exactracting Rule: {0}", rulePrint);
-                lines.Add(string.Format("\"{0}\",{1},{2}",
+
+                Console.WriteLine("Validating Rule: {0}", rulePrint);
+                var doesPageAndAnchorExist = CheckPageAndAnchor(url);
+
+                lines.Add(string.Format("\"{0}\",{1},{2},{3}",
                     ruleNumber,
                     type.FriendlyName(),
-                    url));
+                    url,
+                    doesPageAndAnchorExist));
             }
 
             lines = lines.OrderBy(x => x).ToList();
             var outputFile = Path.Combine(dir.FullName, "graphql-aspnet-rulesList.csv");
             using var writer = new StreamWriter(outputFile, false);
 
+            writer.WriteLine("\"Rule Number\",\"Class\",\"Reference Url\",\"Url Exists\"");
             foreach(var line in lines)
                 writer.WriteLine(line);
 
@@ -78,6 +85,31 @@
                 Environment.NewLine);
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
+        }
+
+        private static bool CheckPageAndAnchor(string url)
+        {
+            var uri = new Uri(url);
+            if (!uri.IsWellFormedOriginalString())
+                return false;
+
+            var anchor = "";
+            if (url.Contains("#"))
+            {
+                anchor = url.Substring(url.IndexOf("#"));
+
+                // searching for a
+                anchor = $"<a href=\"{anchor}\">";
+            }
+
+            var pageTask = _client.GetStringAsync(url);
+            pageTask.Wait();
+
+            var str = pageTask.Result;
+            if(anchor != "")
+                return str.Contains(anchor);
+
+            return str != "";
         }
     }
 }

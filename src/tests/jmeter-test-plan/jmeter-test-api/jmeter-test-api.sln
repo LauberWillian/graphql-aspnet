@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jmeter-test-api", "jmeter-test-api\jmeter-test-api.csproj", "{0FAAC52E-D136-44D2-9FB6-F611DA6A8C68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jmeter-test-api", "jmeter-test-api\jmeter-test-api.csproj", "{0FAAC52E-D136-44D2-9FB6-F611DA6A8C68}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql-aspnet", "..\..\..\graphql-aspnet\graphql-aspnet.csproj", "{F4ABAC1D-7BC5-4190-AA25-92E3F1FB3674}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql-aspnet-subscriptions", "..\..\..\graphql-aspnet-subscriptions\graphql-aspnet-subscriptions.csproj", "{2599CBE0-2028-4E03-AAB9-A30AF5FB1E0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jmeter-test-model", "jmeter-test-model\jmeter-test-model.csproj", "{6A4324E3-C05A-4DC6-A302-B5458591DE3B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{2599CBE0-2028-4E03-AAB9-A30AF5FB1E0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2599CBE0-2028-4E03-AAB9-A30AF5FB1E0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2599CBE0-2028-4E03-AAB9-A30AF5FB1E0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A4324E3-C05A-4DC6-A302-B5458591DE3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A4324E3-C05A-4DC6-A302-B5458591DE3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A4324E3-C05A-4DC6-A302-B5458591DE3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A4324E3-C05A-4DC6-A302-B5458591DE3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
