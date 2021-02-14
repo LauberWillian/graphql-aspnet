@@ -1,15 +1,13 @@
-namespace jmeter_test_api
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
+﻿// *************************************************************
+// project:  GraphQL JMeter API
+// *************************************************************
 
-    public class Program
+namespace GraphQL.AspNet.JMeterAPI
+{
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Hosting;
+
+    public static class Program
     {
         public static void Main(string[] args)
         {

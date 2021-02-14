@@ -9,7 +9,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql-aspnet", "..\..\..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "graphql-aspnet-subscriptions", "..\..\..\graphql-aspnet-subscriptions\graphql-aspnet-subscriptions.csproj", "{2599CBE0-2028-4E03-AAB9-A30AF5FB1E0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "jmeter-test-model", "jmeter-test-model\jmeter-test-model.csproj", "{6A4324E3-C05A-4DC6-A302-B5458591DE3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jmeter-test-model", "jmeter-test-model\jmeter-test-model.csproj", "{6A4324E3-C05A-4DC6-A302-B5458591DE3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7052F754-8A0A-4563-A2C1-85EB93378707}"
+	ProjectSection(SolutionItems) = preProject
+		CodeMaid.config = CodeMaid.config
+		stylecop.json = stylecop.json
+		styles.ruleset = styles.ruleset
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
