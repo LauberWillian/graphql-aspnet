@@ -60,7 +60,7 @@ query SearchGroceryStore($pastryName: String!) {
         }
       }
       breadCounter {
-        orders(id: 36) {
+        orders(customerId: 36) {
           id
           items {
             id
