@@ -40,7 +40,6 @@ namespace GraphQL.AspNet.JMeterAPI
 
             services.AddDbContext<BakeryContext>((builder) =>
             {
-
                 var cnnString = Configuration.GetConnectionString("BakeryDb");
                 cnnString = cnnString.Replace("|DataDirectory|", this.DataDirectory);
                 builder.UseSqlServer(cnnString);
@@ -51,6 +50,7 @@ namespace GraphQL.AspNet.JMeterAPI
         {
             var logger = app.ApplicationServices.GetService<ILoggerFactory>().CreateLogger<Startup>();
 
+            // Seed the test database if needed
             if (File.Exists(Path.Combine(this.DataDirectory, "bakery-jmeter-api.mdf")))
             {
                 logger.LogInformation("Database exists, skipping seed data.");
@@ -68,7 +68,6 @@ namespace GraphQL.AspNet.JMeterAPI
                 logger.LogInformation("Database Seeding Complete.");
             }
 
-            // bakery-jmeter-api_log
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

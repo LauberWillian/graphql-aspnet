@@ -20,11 +20,6 @@ namespace GraphQL.AspNet.JMeterAPI
         private const int BAKERIES_PER_ORG = 100;
         private const int STOCK_PER_RECIPE = int.MaxValue;
 
-        private int _orgId = 0;
-        private int _recipeId = 0;
-        private int _bakeryId = 0;
-        private int _stockId = 0;
-
         private ILogger<BakeryContextDataSeeder> _logger;
 
         public BakeryContextDataSeeder(ILoggerFactory loggerFactory)
@@ -34,9 +29,9 @@ namespace GraphQL.AspNet.JMeterAPI
 
         public void Seed(BakeryContext context)
         {
-            var orgs = this.CreateOrganizations(TOTAL_ORGS);
+            _logger.LogInformation($"Generating Test Data");
 
-            _logger.LogInformation($"Staging Seed Data");
+            var orgs = this.CreateOrganizations();
             foreach (var org in orgs)
             {
                 context.Add(org);
@@ -47,12 +42,13 @@ namespace GraphQL.AspNet.JMeterAPI
                                 (TOTAL_ORGS * BAKERIES_PER_ORG) + // bakeries
                                 (TOTAL_ORGS * BAKERIES_PER_ORG * RECIPES_PER_ORG); // stock per bakery
 
-            _logger.LogInformation($"Updating Database (approx. {expectedCount}  records)...");
+            _logger.LogInformation($"Seeding the Database (approx. {expectedCount}  records).\r\nThis may take a minute...");
             var records = context.SaveChanges();
-            _logger.LogInformation($"{records} records created");
+            _logger.LogInformation($"({records} records created.)");
+            _logger.LogInformation($"Database seeding complete.");
         }
 
-        private List<Organization> CreateOrganizations(int count)
+        private List<Organization> CreateOrganizations()
         {
             var faker = new Faker<Organization>()
                 .RuleFor(x => x.Name, f => f.Company.CompanyName())
@@ -81,7 +77,7 @@ namespace GraphQL.AspNet.JMeterAPI
                 .RuleFor(x => x.OrganizationId, org.Id)
                 .RuleFor(x => x.Organization, org);
 
-            _logger.LogInformation($"Seeding {RECIPES_PER_ORG} recipes for {org.Name}");
+            _logger.LogInformation($"Creating {RECIPES_PER_ORG} recipes for {org.Name}");
             var recipes = faker.Generate(RECIPES_PER_ORG);
             org.Recipes = recipes;
         }
@@ -98,7 +94,7 @@ namespace GraphQL.AspNet.JMeterAPI
                 .RuleFor(x => x.OrganizationId, org.Id)
                 .RuleFor(x => x.Organization, org);
 
-            _logger.LogInformation($"Seeding {BAKERIES_PER_ORG} bakeries for {org.Name}");
+            _logger.LogInformation($"Creating {BAKERIES_PER_ORG} bakeries for {org.Name}");
             var bakeries = faker.Generate(BAKERIES_PER_ORG);
             org.Bakeries = bakeries;
 
@@ -117,7 +113,7 @@ namespace GraphQL.AspNet.JMeterAPI
                 .RuleFor(x => x.NumberForSale, STOCK_PER_RECIPE)
                 .RuleFor(x => x.SalePriceEach, f => Convert.ToDecimal(f.Commerce.Price(0, 5, 2)));
 
-            _logger.LogInformation($"Seeding {org.Recipes.Count} stock items for bakery {bakery.Name}");
+            _logger.LogInformation($"Creating {org.Recipes.Count} stock items for bakery {bakery.Name}");
             var allStock = new List<PastryStock>();
             for (i = 0; i < org.Recipes.Count; i++)
             {
