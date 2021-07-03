@@ -4,8 +4,8 @@
 
 namespace GraphQL.AspNet.JMeterAPI
 {
-    using System;
     using System.IO;
+    using GraphQL.AspNet.Configuration.Mvc;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
@@ -44,6 +44,11 @@ namespace GraphQL.AspNet.JMeterAPI
                 cnnString = cnnString.Replace("|DataDirectory|", this.DataDirectory);
                 builder.UseSqlServer(cnnString);
             });
+
+            services.AddGraphQL(options =>
+            {
+                options.AddGraphAssembly(typeof(BakeryContext).Assembly);
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, BakeryContext context)
@@ -68,19 +73,9 @@ namespace GraphQL.AspNet.JMeterAPI
                 logger.LogInformation("Database Seeding Complete.");
             }
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseRouting();
-
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseGraphQL();
         }
 
         public IWebHostEnvironment Environment { get; }
