@@ -25,7 +25,7 @@ namespace GraphQL.AspNet.JMeterAPI.Controllers
         }
 
         [QueryRoot("organization", typeof(Organization))]
-        public Task<IGraphActionResult> RetrieveOrganizationRoot(int id)
+        public Task<IGraphActionResult> RootRetrieveOrganization(int id)
             => this.RetrieveOrg(id);
 
         [Query("find", typeof(Organization))]
