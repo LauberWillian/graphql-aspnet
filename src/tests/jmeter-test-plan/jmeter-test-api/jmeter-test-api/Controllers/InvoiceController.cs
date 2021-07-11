@@ -40,7 +40,8 @@ namespace GraphQL.AspNet.JMeterAPI.Controllers
             decimal? minTotalCost = null,
             decimal? maxTotalCost = null)
         {
-            var query = _context.Invoices as IQueryable<Invoice>;
+            var query = this.AddSubEntities(_context.Invoices);
+
             query = query
               .Include(x => x.LineItems)
               .ThenInclude(x => x.Pastry)
@@ -66,13 +67,23 @@ namespace GraphQL.AspNet.JMeterAPI.Controllers
                 query = query.Where(x => x.TotalCost <= maxTotalCost.Value);
 
             var invoices = await query.ToListAsync();
+
             return this.Ok(invoices);
         }
 
         private async Task<IGraphActionResult> RetrieveInvoiceById(int id)
         {
-            var invoice = await _context.Invoices.SingleOrDefaultAsync(x => x.Id == id);
+            var invoice = await this.AddSubEntities(_context.Invoices)
+                .SingleOrDefaultAsync(x => x.Id == id);
             return this.Ok(invoice);
+        }
+
+        private IQueryable<Invoice> AddSubEntities(IQueryable<Invoice> query)
+        {
+            return query
+                .Include(x => x.LineItems)
+                .Include(x => x.Organization)
+                .Include(x => x.Bakery);
         }
     }
 }

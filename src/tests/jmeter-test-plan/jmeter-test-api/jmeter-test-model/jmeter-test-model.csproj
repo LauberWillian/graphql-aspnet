@@ -23,4 +23,9 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\graphql-aspnet\graphql-aspnet.csproj" />
+  </ItemGroup>
+
 </Project>

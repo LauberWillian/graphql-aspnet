@@ -35,8 +35,7 @@ namespace GraphQL.AspNet.JMeterAPI.Controllers
         [Query("search", typeof(IEnumerable<Organization>))]
         public async Task<IGraphActionResult> RetrieveOrganization(string nameLike)
         {
-            var orgs = await _context
-                .Organizations
+            var orgs = await this.AddSubEntities(_context.Organizations)
                 .Where(x => x.Name.StartsWith(nameLike))
                 .ToListAsync();
 
@@ -45,8 +44,17 @@ namespace GraphQL.AspNet.JMeterAPI.Controllers
 
         private async Task<IGraphActionResult> RetrieveOrg(int id)
         {
-            var org = await _context.Organizations.SingleOrDefaultAsync(x => x.Id == id);
+            var org = await this.AddSubEntities(_context.Organizations).SingleOrDefaultAsync(x => x.Id == id);
             return this.Ok(org);
+        }
+
+        private IQueryable<Organization> AddSubEntities(IQueryable<Organization> query)
+        {
+            return query
+                .Include(x => x.Bakeries)
+                .Include(x => x.Recipes)
+                .Include(x => x.Invoices)
+                .ThenInclude(x => x.LineItems);
         }
     }
 }

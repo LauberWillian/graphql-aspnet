@@ -42,7 +42,9 @@ namespace GraphQL.AspNet.JMeterAPI
             {
                 var cnnString = Configuration.GetConnectionString("BakeryDb");
                 cnnString = cnnString.Replace("|DataDirectory|", this.DataDirectory);
-                builder.UseSqlServer(cnnString);
+                builder.UseSqlServer(
+                    cnnString,
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery));
             });
 
             services.AddGraphQL(options =>

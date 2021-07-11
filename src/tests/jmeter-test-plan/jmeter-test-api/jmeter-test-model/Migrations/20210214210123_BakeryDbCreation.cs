@@ -8,7 +8,7 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Organizations",
+                name: "Organization",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -22,11 +22,11 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Organizations", x => x.Id);
+                    table.PrimaryKey("PK_Organization", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Bakeries",
+                name: "Bakery",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -41,11 +41,11 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bakeries", x => x.Id);
+                    table.PrimaryKey("PK_Bakery", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Bakeries_Organizations_OrganizationId",
+                        name: "FK_Bakery_Organization_OrganizationId",
                         column: x => x.OrganizationId,
-                        principalTable: "Organizations",
+                        principalTable: "Organization",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -64,15 +64,15 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 {
                     table.PrimaryKey("PK_PastryRecipe", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PastryRecipe_Organizations_OrganizationId",
+                        name: "FK_PastryRecipe_Organization_OrganizationId",
                         column: x => x.OrganizationId,
-                        principalTable: "Organizations",
+                        principalTable: "Organization",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Invoices",
+                name: "Invoice",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -84,17 +84,17 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Invoices", x => x.Id);
+                    table.PrimaryKey("PK_Invoice", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Invoices_Bakeries_BakeryId",
+                        name: "FK_Invoice_Bakery_BakeryId",
                         column: x => x.BakeryId,
-                        principalTable: "Bakeries",
+                        principalTable: "Bakery",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
-                        name: "FK_Invoices_Organizations_OrganizationId",
+                        name: "FK_Invoice_Organization_OrganizationId",
                         column: x => x.OrganizationId,
-                        principalTable: "Organizations",
+                        principalTable: "Organization",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                 });
@@ -114,9 +114,9 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 {
                     table.PrimaryKey("PK_PastryStock", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PastryStock_Bakeries_BakeryId",
+                        name: "FK_PastryStock_Bakery_BakeryId",
                         column: x => x.BakeryId,
-                        principalTable: "Bakeries",
+                        principalTable: "Bakery",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
@@ -142,9 +142,9 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 {
                     table.PrimaryKey("PK_InvoiceLineItem", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InvoiceLineItem_Invoices_InvoiceId",
+                        name: "FK_InvoiceLineItem_Invoice_InvoiceId",
                         column: x => x.InvoiceId,
-                        principalTable: "Invoices",
+                        principalTable: "Invoice",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -156,8 +156,8 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Bakeries_OrganizationId",
-                table: "Bakeries",
+                name: "IX_Bakery_OrganizationId",
+                table: "Bakery",
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
@@ -171,13 +171,13 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 column: "PastryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Invoices_BakeryId",
-                table: "Invoices",
+                name: "IX_Invoice_BakeryId",
+                table: "Invoice",
                 column: "BakeryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Invoices_OrganizationId",
-                table: "Invoices",
+                name: "IX_Invoice_OrganizationId",
+                table: "Invoice",
                 column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
@@ -205,16 +205,16 @@ namespace GraphQL.AspNet.JMeterAPI.Migrations
                 name: "PastryStock");
 
             migrationBuilder.DropTable(
-                name: "Invoices");
+                name: "Invoice");
 
             migrationBuilder.DropTable(
                 name: "PastryRecipe");
 
             migrationBuilder.DropTable(
-                name: "Bakeries");
+                name: "Bakery");
 
             migrationBuilder.DropTable(
-                name: "Organizations");
+                name: "Organization");
         }
     }
 }

@@ -25,12 +25,12 @@
     <ContinuousIntegrationBuild Condition="'$(TF_BUILD)' == 'true'">True</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-<ItemGroup>
-  <None Include="..\icon.png">
-    <Pack>True</Pack>
-    <PackagePath></PackagePath>
-  </None>
-</ItemGroup>
+  <ItemGroup>
+    <None Include="..\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\styles.ruleset</CodeAnalysisRuleSet>

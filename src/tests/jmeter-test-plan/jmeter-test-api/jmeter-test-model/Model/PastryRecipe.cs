@@ -6,6 +6,7 @@ namespace GraphQL.AspNet.JMeterAPI.Model
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using GraphQL.AspNet.Attributes;
 
     /// <summary>
     /// A propritery recipe for a given Pastry. Owned by an organization and sold
@@ -23,6 +24,7 @@ namespace GraphQL.AspNet.JMeterAPI.Model
         [StringLength(1500)]
         public string RecipeText { get; set; }
 
+        [GraphSkip]
         public int OrganizationId { get; set; }
 
         [ForeignKey(nameof(OrganizationId))]

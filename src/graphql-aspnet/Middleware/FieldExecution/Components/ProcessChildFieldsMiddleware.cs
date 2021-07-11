@@ -272,7 +272,7 @@ namespace GraphQL.AspNet.Middleware.FieldExecution.Components
                     dic[result.FoundTypes[0]].Add(dataItem);
                 }
 
-                // validation rules 6.4.3 will always pick up (and kill)
+                // core validation rule 6.4.3 will always pick up (and kill)
                 // any un matchable or un process-able results. we don't need
                 // to check failures here
             }

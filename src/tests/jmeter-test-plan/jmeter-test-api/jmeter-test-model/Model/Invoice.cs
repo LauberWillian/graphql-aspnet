@@ -7,6 +7,7 @@ namespace GraphQL.AspNet.JMeterAPI.Model
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using GraphQL.AspNet.Attributes;
 
     /// <summary>
     /// An invoice created as a result of a sale of items by a bakery.
@@ -16,8 +17,10 @@ namespace GraphQL.AspNet.JMeterAPI.Model
         [Key]
         public int Id { get; set; }
 
+        [GraphSkip]
         public int OrganizationId { get; set; }
 
+        [GraphSkip]
         public int BakeryId { get; set; }
 
         [Required]

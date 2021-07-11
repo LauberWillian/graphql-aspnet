@@ -6,6 +6,7 @@ namespace GraphQL.AspNet.JMeterAPI.Model
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using GraphQL.AspNet.Attributes;
 
     /// <summary>
     /// The number of items of a given recipe a bakery has for sale
@@ -17,9 +18,11 @@ namespace GraphQL.AspNet.JMeterAPI.Model
         public int Id { get; set; }
 
         [Required]
+        [GraphSkip]
         public int BakeryId { get; set; }
 
         [Required]
+        [GraphSkip]
         public int PastryRecipeId { get; set; }
 
         [Required]

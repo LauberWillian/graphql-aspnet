@@ -7,6 +7,7 @@ namespace GraphQL.AspNet.JMeterAPI.Model
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using GraphQL.AspNet.Attributes;
 
     /// <summary>
     /// A single bakery store owned by an organization.
@@ -16,6 +17,7 @@ namespace GraphQL.AspNet.JMeterAPI.Model
         [Key]
         public int Id { get; set; }
 
+        [GraphSkip]
         public int OrganizationId { get; set; }
 
         [ForeignKey(nameof(OrganizationId))]
