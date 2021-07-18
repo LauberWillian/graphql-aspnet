@@ -17,7 +17,7 @@ namespace GraphQL.AspNet.Interfaces.TypeSystem
     public interface ITypedItem
     {
         /// <summary>
-        /// Gets the type of the object this graph type was made from.
+        /// Gets the <see cref="Type"/> of the object this graph type was made from.
         /// </summary>
         /// <value>The type of the object.</value>
         Type ObjectType { get; }

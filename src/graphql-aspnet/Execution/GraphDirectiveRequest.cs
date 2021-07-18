@@ -47,7 +47,7 @@ namespace GraphQL.AspNet.Execution
         }
 
         /// <summary>
-        /// Clones this request for the given lifecycle location.
+        /// Clones this request and assigns the given lifecycle location.
         /// </summary>
         /// <param name="lifecycle">The lifecycle point at which the directive request should be pointed.</param>
         /// <param name="dataSource">The data source being passed to the field this directive is attached to, if any.</param>
@@ -68,46 +68,25 @@ namespace GraphQL.AspNet.Execution
             return request;
         }
 
-        /// <summary>
-        /// Gets a globally unique identifier assigned to this request when it was created.
-        /// </summary>
-        /// <value>The identifier.</value>
+        /// <inheritdoc />
         public string Id { get; private set; }
 
-        /// <summary>
-        /// Gets the life cycle method being invoked.
-        /// </summary>
-        /// <value>The life cycle.</value>
+        /// <inheritdoc />
         public DirectiveLifeCycle LifeCycle { get; private set; }
 
-        /// <summary>
-        /// Gets the source data, if any, that was made available to this request.
-        /// </summary>
-        /// <value>The source data.</value>
+        /// <inheritdoc />
         public GraphFieldDataSource DataSource { get; private set; }
 
-        /// <summary>
-        /// Gets the directive being executed.
-        /// </summary>
-        /// <value>The directive.</value>
+        /// <inheritdoc />
         public IDirectiveGraphType Directive { get;  }
 
-        /// <summary>
-        /// Gets the origin point in the source text where this request was generated.
-        /// </summary>
-        /// <value>The origin.</value>
+        /// <inheritdoc />
         public SourceOrigin Origin { get; }
 
-        /// <summary>
-        /// Gets any additional metadata or items assigned to this request.
-        /// </summary>
-        /// <value>The metadata.</value>
+        /// <inheritdoc />
         public MetaDataCollection Items { get; }
 
-        /// <summary>
-        /// Gets the <see cref="DirectiveLocation" /> where the directive was declared in the source document.
-        /// </summary>
-        /// <value>The location.</value>
+        /// <inheritdoc />
         public DirectiveLocation DirectiveLocation { get; }
     }
 }

@@ -48,17 +48,10 @@ namespace GraphQL.AspNet.Schemas.Structural
             this.InternalName = propertyDeclaredName;
         }
 
-        /// <summary>
-        /// Gets the type of the object this graph type was made from.
-        /// </summary>
-        /// <value>The type of the object.</value>
+        /// <inheritdoc />
         public Type ObjectType { get; }
 
-        /// <summary>
-        /// Gets a fully qualified name of the type as it exists on the server (i.e.  Namespace.ClassName). This name
-        /// is used in many exceptions and internal error messages.
-        /// </summary>
-        /// <value>The name of the internal.</value>
+        /// <inheritdoc />
         public string InternalName { get; }
     }
 }

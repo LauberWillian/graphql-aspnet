@@ -52,10 +52,7 @@ namespace GraphQL.AspNet.Execution
             this.VariableData = queryData.Variables ?? new InputVariableCollection();
         }
 
-        /// <summary>
-        /// Extracts a raw data package from this request .
-        /// </summary>
-        /// <returns>GraphQueryData.</returns>
+        /// <inheritdoc />
         public GraphQueryData ToDataPackage()
         {
             return new GraphQueryData()
@@ -66,28 +63,16 @@ namespace GraphQL.AspNet.Execution
             };
         }
 
-        /// <summary>
-        /// Gets or sets the name of the operation, from the supplied query document, to execute.
-        /// </summary>
-        /// <value>The name of the operation.</value>
+        /// <inheritdoc />
         public string OperationName { get; set; }
 
-        /// <summary>
-        /// Gets the query text that was supplied by the end user to be parsed and processed.
-        /// </summary>
-        /// <value>The query text.</value>
+        /// <inheritdoc />
         public string QueryText { get; }
 
-        /// <summary>
-        /// Gets or sets the variables, if any, supplied by the end user.
-        /// </summary>
-        /// <value>The variables.</value>
+        /// <inheritdoc />
         public IInputVariableCollection VariableData { get; set; }
 
-        /// <summary>
-        /// Gets a globally unique identifier assigned to this request when it was created.
-        /// </summary>
-        /// <value>The identifier.</value>
+        /// <inheritdoc />
         public string Id { get; }
 
         /// <summary>

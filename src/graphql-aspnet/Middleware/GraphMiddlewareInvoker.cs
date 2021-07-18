@@ -92,13 +92,13 @@ namespace GraphQL.AspNet.Middleware
         }
 
         /// <summary>
-        /// Gets the next delegate to call in the request chain.
+        /// Gets the next delegate to call in the request chain after this one.
         /// </summary>
         /// <value>The next.</value>
         public GraphMiddlewareInvocationDelegate<TContext> Next { get; }
 
         /// <summary>
-        /// Gets the component definition that is to invoked.
+        /// Gets the definition of hte component that is to be invoked by this instance.
         /// </summary>
         /// <value>The component.</value>
         public GraphMiddlewareDefinition<TContext> ComponentDefinition { get; }
