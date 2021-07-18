@@ -63,7 +63,7 @@ namespace GraphQL.AspNet.Schemas.Structural
         /// </summary>
         /// <param name="newResolver">The new resolver this field should use.</param>
         /// <param name="mode">The new resolution mode used by the runtime to invoke the resolver.</param>
-        public void UpdateResolver(IGraphFieldResolver newResolver, FieldResolutionMode mode)
+        protected void UpdateResolver(IGraphFieldResolver newResolver, FieldResolutionMode mode)
         {
             this.Resolver = newResolver;
             this.Mode = mode;

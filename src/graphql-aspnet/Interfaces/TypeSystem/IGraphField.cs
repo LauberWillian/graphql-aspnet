@@ -24,13 +24,6 @@ namespace GraphQL.AspNet.Interfaces.TypeSystem
     public interface IGraphField : IDeprecatable, IGraphFieldArgumentContainer
     {
         /// <summary>
-        /// Updates the field resolver used by this graph field.
-        /// </summary>
-        /// <param name="newResolver">The new resolver this field should use.</param>
-        /// <param name="mode">The new resolution mode used by the runtime to invoke the resolver.</param>
-        void UpdateResolver(IGraphFieldResolver newResolver, FieldResolutionMode mode);
-
-        /// <summary>
         /// Gets the type expression that represents the data returned from this field (i.e. the '[SomeType!]'
         /// declaration used in schema definition language.)
         /// </summary>
