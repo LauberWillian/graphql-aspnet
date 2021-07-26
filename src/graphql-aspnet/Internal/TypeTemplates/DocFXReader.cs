@@ -11,11 +11,13 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
 {
     using System;
     using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.Caching;
     using System.Xml;
     using GraphQL.AspNet.Common;
 
@@ -23,9 +25,23 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
     /// A class that read in the generated XML file for using DocFx (triple-slash comments) to be used as descriptions
     /// for types, methods, properties and parameters in lue of <see cref="DescriptionAttribute"/>.
     /// </summary>
-    public class DocFXReader : IDisposable
+    public partial class DocFxReader : IDisposable
     {
         private const string SUMMARY_ELEMENT = "summary";
+        private static readonly TimeSpan _defaultCacheTime = TimeSpan.FromSeconds(15);
+
+        private class CachedXmlFile
+        {
+            public CachedXmlFile(XmlDocument document, TimeSpan expiresAfter)
+            {
+                this.Document = document;
+                this.ExpiresAfter = DateTimeOffset.UtcNow.Add(expiresAfter);
+            }
+
+            public XmlDocument Document { get; }
+
+            public DateTimeOffset ExpiresAfter { get; }
+        }
 
         /// <summary>
         /// Attempts to create a qualfied DocFx file location for the given assembly.
@@ -51,28 +67,41 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
             return fileName;
         }
 
-        private Dictionary<string, XmlDocument> _xmlDocuments;
+        private readonly TimeSpan _cacheExpiryTime;
+
+        private MemoryCache _xmlCache;
         private List<string> _fileFolders;
+        private HashSet<string> _usedKeys;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocFXReader" /> class.
+        /// Initializes a new instance of the <see cref="DocFxReader" /> class.
         /// </summary>
+        /// <param name="cacheExpiryTime">The amount of time to hold loaded docFx files
+        /// in memory before purging. When null, a default time of 15 seconds is used.</param>
         /// <param name="fileFolders">A set of folders on disk to search for docFx files. The assembly
         /// location is automatically searched for any type or member requested.</param>
-        public DocFXReader(params string[] fileFolders)
-            : this((IEnumerable<string>)fileFolders)
+        public DocFxReader(
+            TimeSpan? cacheExpiryTime = null,
+            params string[] fileFolders)
+            : this(cacheExpiryTime, (IEnumerable<string>)fileFolders)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocFXReader"/> class.
+        /// Initializes a new instance of the <see cref="DocFxReader"/> class.
         /// </summary>
+        /// <param name="cacheExpiryTime">The amount of time to hold loaded docFx files
+        /// in memory before purging. When null, a default time of 15 seconds is used.</param>
         /// <param name="fileFolders">A set of folders on disk to search for docFx files. The assembly
         /// location is automatically searched for any type or member requested.</param>
-        public DocFXReader(IEnumerable<string> fileFolders = null)
+        public DocFxReader(
+            TimeSpan? cacheExpiryTime = null,
+            IEnumerable<string> fileFolders = null)
         {
-            _xmlDocuments = new Dictionary<string, XmlDocument>();
+            _cacheExpiryTime = cacheExpiryTime ?? _defaultCacheTime;
+            _xmlCache = new MemoryCache(nameof(DocFxReader) + "Cache");
             _fileFolders = new List<string>(fileFolders ?? Enumerable.Empty<string>());
+            _usedKeys = new HashSet<string>();
         }
 
         /// <summary>
@@ -85,12 +114,15 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
         {
             // make a key that is the name of the assembly file name (minus extension)
             var location = new FileInfo(assembly.Location);
-            string key = location.Name;
-            if (key.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-                key = key.Substring(0, key.Length - 4);
+            string cacheKey = location.Name;
+            if (cacheKey.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+                cacheKey = cacheKey.Substring(0, cacheKey.Length - 4);
 
-            if (_xmlDocuments.ContainsKey(key))
-                return _xmlDocuments[key];
+            var cacheItem = _xmlCache.GetCacheItem(cacheKey);
+            if (cacheItem != null)
+            {
+                return cacheItem.Value as XmlDocument;
+            }
 
             // if the assembly is not really on disk, just stop
             if (!location.Exists)
@@ -101,28 +133,36 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
             if (_fileFolders.Count > 0)
                 foldersToSearch.AddRange(_fileFolders);
 
+            XmlDocument xmlDocument = null;
             foreach (var folder in foldersToSearch)
             {
-                var filePath = Path.Combine(folder, $"{key}.xml");
+                var filePath = Path.Combine(folder, $"{cacheKey}.xml");
                 if (File.Exists(filePath))
                 {
                     try
                     {
-                        var xmlDocument = new XmlDocument();
+                        xmlDocument = new XmlDocument();
                         xmlDocument.Load(filePath);
-
-                        _xmlDocuments.Add(key, xmlDocument);
-                        return xmlDocument;
                     }
                     catch
                     {
+                        xmlDocument = null;
                     }
                 }
+
+                if (xmlDocument != null)
+                    break;
             }
 
-            // couldn't find the file, no need to ever try again
-            _xmlDocuments.Add(key, null);
-            return null;
+            xmlDocument = xmlDocument ?? new XmlDocument();
+
+            // cache the file or a null reference
+            var cachePolicy = new CacheItemPolicy();
+            cachePolicy.SlidingExpiration = _cacheExpiryTime;
+
+            _xmlCache.Add(new CacheItem(cacheKey, xmlDocument), cachePolicy);
+            _usedKeys.Add(cacheKey);
+            return xmlDocument;
         }
 
         private string CreateKeyName(Type type, MemberInfo member = null)
@@ -210,6 +250,16 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
             return null;
         }
 
+        /// <summary>
+        /// Attempts to loop through the type, the types it inherits from and the interfaces
+        /// it implements searching for docfx key that can satify the request for the 'summary' xml element.
+        /// This method will automatically follow any 'inheritdoc' elements according to their
+        /// specificity.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <param name="member">The individual member on the type if any. When null the type
+        /// itself will be inspected for a class/interface level 'summary' element.</param>
+        /// <returns>System.String.</returns>
         private string ReadSummaryText(Type type, MemberInfo member = null)
         {
             string exactKey = null;
@@ -268,6 +318,14 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
             return node?.SelectSingleNode(elementName)?.InnerText;
         }
 
+        /// <summary>
+        /// Determines whether the given node represents a member that defines an inherit
+        /// doc statement pointing to another member for its documentation.
+        /// </summary>
+        /// <param name="node">The node to inspect.</param>
+        /// <param name="inheritFrom">The specific cref value in the inheritdoc element, if found. Value is
+        /// null when no cref is set.</param>
+        /// <returns><c>true</c> if the member does define an inheritdoc element; <c>false</c> otherwise.</returns>
         private bool IsInheritDoc(XmlNode node, out string inheritFrom)
         {
             inheritFrom = null;
@@ -287,17 +345,6 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
         }
 
         /// <summary>
-        /// Closes this docFx reader, releasing any contained resources.
-        /// </summary>
-        public void Close()
-        {
-            foreach (var key in _xmlDocuments.Keys)
-                _xmlDocuments[key] = null;
-
-            _xmlDocuments = null;
-        }
-
-        /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         public void Dispose()
@@ -311,7 +358,11 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
         /// <param name="isDisposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool isDisposing)
         {
-            this.Close();
+            if (isDisposing)
+            {
+                _usedKeys.Clear();
+                _xmlCache.Dispose();
+            }
         }
 
         /// <summary>

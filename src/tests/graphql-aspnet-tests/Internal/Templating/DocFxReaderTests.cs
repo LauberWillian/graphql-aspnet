@@ -23,49 +23,57 @@ namespace GraphQL.AspNet.Tests.Internal.Templating
         [Test]
         public void SimpleTypeDescription_IsReadForExistingType()
         {
-            var reader = new DocFXReader();
+            var reader = new DocFxReader();
             var result = reader.ReadDescription(typeof(SimpleClassWithDocFxComments));
 
             var expected = "A comment for DocFx to read.";
             Assert.AreEqual(expected, result);
+
+            reader.Dispose();
         }
 
         [Test]
         public void SimpleMethodDescription_IsReadForExistingMethod()
         {
-            var reader = new DocFXReader();
+            var reader = new DocFxReader();
             var methodInfo = typeof(SimpleClassWithDocFxComments).GetMethod(nameof(SimpleClassWithDocFxComments.TestMethod));
             var result = reader.ReadDescription(methodInfo);
 
             var expected = "A comment on test method to read.";
             Assert.AreEqual(expected, result);
+
+            reader.Dispose();
         }
 
         [Test]
         public void SimplePropertyDescription_IsReadForExistingproperty()
         {
-            var reader = new DocFXReader();
+            var reader = new DocFxReader();
             var propInfo = typeof(SimpleClassWithDocFxComments).GetProperty(nameof(SimpleClassWithDocFxComments.TestProperty));
             var result = reader.ReadDescription(propInfo);
 
             var expected = "Gets or sets a comment on test property to read.";
             Assert.AreEqual(expected, result);
+
+            reader.Dispose();
         }
 
         [Test]
         public void SimpleMethodDescription_WithNoHeaderInfo_ReturnsNull()
         {
-            var reader = new DocFXReader();
+            var reader = new DocFxReader();
             var methodInfo = typeof(SimpleClassWithDocFxComments).GetMethod(nameof(SimpleClassWithDocFxComments.NoMethodSummary));
             var result = reader.ReadDescription(methodInfo);
 
             Assert.IsNull(result);
+
+            reader.Dispose();
         }
 
         [Test]
         public void MethodWithGeneralInheritDocFromInterface_ReadsCorrectSummary()
         {
-            var reader = new DocFXReader();
+            var reader = new DocFxReader();
             var methodInfo = typeof(ImplementInterfaceClassWithDocFx)
                             .GetMethod(nameof(ImplementInterfaceClassWithDocFx.MethodFromInterface));
 
@@ -73,18 +81,36 @@ namespace GraphQL.AspNet.Tests.Internal.Templating
 
             var expected = "This is a method with a comment on an interface.";
             Assert.AreEqual(expected, result);
+
+            reader.Dispose();
         }
 
         [Test]
         public void MethodWithExplictInheritDocFromInterface_ReadsCorrectSummary()
         {
-            var reader = new DocFXReader();
+            var reader = new DocFxReader();
             var methodInfo = typeof(ImplementInterfaceClassWithDocFx)
                              .GetMethod(nameof(ImplementInterfaceClassWithDocFx.MethodFromInterface2));
             var result = reader.ReadDescription(methodInfo);
 
             var expected = "This is a method with a comment on an interface2.";
             Assert.AreEqual(expected, result);
+
+            reader.Dispose();
+        }
+
+        [Test]
+        public void WhenBaseClassImplementsDoc_AndChildClassHasInheritDoc_BaseDocIsUsed()
+        {
+            var reader = new DocFxReader();
+            var methodInfo = typeof(ChildClassWithInheritDoc)
+                             .GetMethod(nameof(ChildClassWithInheritDoc.MethodToCall));
+            var result = reader.ReadDescription(methodInfo);
+
+            var expected = "This is the methodToCall description.";
+            Assert.AreEqual(expected, result);
+
+            reader.Dispose();
         }
     }
 }
