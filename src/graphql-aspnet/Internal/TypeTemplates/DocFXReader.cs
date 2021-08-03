@@ -18,6 +18,7 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
     using System.Linq;
     using System.Reflection;
     using System.Runtime.Caching;
+    using System.Security.Cryptography.X509Certificates;
     using System.Xml;
     using GraphQL.AspNet.Common;
 
@@ -180,6 +181,15 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
                 {
                     keyPrefix = "M";
                     keySuffix = mi.Name;
+
+                    var parameters = mi.GetParameters();
+                    if (parameters != null && parameters.Length > 0)
+                    {
+                        keySuffix += "(";
+                        keySuffix += string.Join(",", parameters.Select(x => x.ParameterType.FullName));
+                        keySuffix += ")";
+                    }
+
                 }
             }
 
@@ -196,7 +206,9 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
         /// <param name="type">The type to key off of.</param>
         /// <param name="member">The member of the type, if needed.</param>
         /// <returns>IEnumerable&lt;System.String&gt;.</returns>
-        private IEnumerable<(string keyName, Assembly assembly)> GenerateKeyList(Type type, MemberInfo member = null)
+        private IEnumerable<(string keyName, Assembly assembly)> GenerateKeyList(
+            Type type,
+            MemberInfo member = null)
         {
             // key/assembly fro the provided type
             yield return (this.CreateKeyName(type, member), type.Assembly);
@@ -245,9 +257,9 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
         /// </summary>
         /// <param name="member">The member.</param>
         /// <returns>System.String.</returns>
-        public string ReadDescription(ParameterInfo member)
+        public string ReadDescription(ParameterInfo param)
         {
-            return null;
+            return this.ReadSummaryText(param.Member.DeclaringType, param.Member, param);
         }
 
         /// <summary>
@@ -260,19 +272,19 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
         /// <param name="member">The individual member on the type if any. When null the type
         /// itself will be inspected for a class/interface level 'summary' element.</param>
         /// <returns>System.String.</returns>
-        private string ReadSummaryText(Type type, MemberInfo member = null)
+        private string ReadSummaryText(Type type, MemberInfo member = null, ParameterInfo param = null)
         {
             string exactKey = null;
-            var keyWasMatched = false;
+            var exactKeyWasMatched = false;
             foreach (var keySet in this.GenerateKeyList(type, member))
             {
-                if (keyWasMatched)
+                if (exactKeyWasMatched)
                     break;
 
                 if (exactKey != null)
                 {
-                    keyWasMatched = exactKey == keySet.keyName;
-                    if (!keyWasMatched)
+                    exactKeyWasMatched = exactKey == keySet.keyName;
+                    if (!exactKeyWasMatched)
                         continue;
                 }
 
@@ -280,25 +292,43 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
                 if (doc == null)
                     continue;
 
-                // if a key is not defined then it has no doxFx text (not summary or inheritdoc)
-                // is defined, we can safely just stop
-                var node = this.FindNode(doc, keySet.keyName);
+                // if a node doesnt exist in a doc then it has no doxFx text (not summary or inheritdoc)
+                // is defined, we can safely just skip it.
+                var node = this.FindMemberNode(doc, keySet.keyName);
                 if (node == null)
                     continue;
 
-                // try and read the
-                var result = this.ReadElementText(node, SUMMARY_ELEMENT)?.Trim();
+                // try and read the <summary /> text from the node
+                string result = null;
+                if (param == null)
+                {
+                    result = this.ReadSummaryText(node)?.Trim();
+                }
+                else if (member is MethodInfo mi)
+                {
+                    result = this.ReadParameterText(node, mi, param);
+                }
+
                 if (!string.IsNullOrWhiteSpace(result))
                     return result;
 
-                if (this.IsInheritDoc(node, out string inheritFrom))
-                    exactKey = inheritFrom;
+                // if the node is specified to <inheritdoc /> its text from the next level up
+                // continue to do so; otherwise just stop completely
+                if (this.IsInheritDoc(node, out string cref))
+                    exactKey = cref;
+                else
+                    break;
             }
 
             return null;
         }
 
-        private XmlNode FindNode(XmlDocument doc, string key)
+        private string ReadParameterText(XmlNode node, MethodInfo mi, ParameterInfo param)
+        {
+            throw new NotImplementedException();
+        }
+
+        private XmlNode FindMemberNode(XmlDocument doc, string key)
         {
             try
             {
@@ -313,9 +343,24 @@ namespace GraphQL.AspNet.Internal.TypeTemplates
             return null;
         }
 
-        private string ReadElementText(XmlNode node, string elementName)
+        private XmlNode FindParameterNode(XmlNode memberNode, string paramName)
         {
-            return node?.SelectSingleNode(elementName)?.InnerText;
+            try
+            {
+                var nodes = memberNode?.SelectNodes($"//param[@name='{paramName}']");
+                if (nodes != null && nodes.Count == 1)
+                    return nodes[0];
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
+        private string ReadSummaryText(XmlNode node)
+        {
+            return node?.SelectSingleNode(SUMMARY_ELEMENT)?.InnerText;
         }
 
         /// <summary>
